@@ -7,10 +7,10 @@ var UserModel = require("../models/users")
 router.post("/addquest", async function (req, res, next) {
   console.log(req.body)
   var user = await UserModel.findOne({
-    token: "6iHdoksmwLx5izQHrQg6Y3nFKPOLWe4u",
+    token: req.body.token,
   })
 
-  user.quests.push(req.body)
+  user.quests.push(req.body.quest)
 
   var userSaved = await user.save()
 
