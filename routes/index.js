@@ -1,25 +1,25 @@
-var mongoose = require("mongoose")
+var mongoose = require("mongoose");
 
-var express = require("express")
-var router = express.Router()
-var UserModel = require("../models/users")
+var express = require("express");
+var router = express.Router();
+var UserModel = require("../models/users");
 
 router.post("/addquest", async function (req, res, next) {
-  console.log(req.body)
+  console.log(req.body);
   var user = await UserModel.findOne({
-    token: "6iHdoksmwLx5izQHrQg6Y3nFKPOLWe4u",
-  })
+    token: "G8RIZjX6we4_p4fIsrCXL8oaojFjvcRg",
+  });
 
-  user.quests.push(req.body)
+  user.quests.push(req.body);
 
-  var userSaved = await user.save()
+  var userSaved = await user.save();
 
   if (userSaved) {
-    result = true
+    result = true;
   } else {
-    result = false
+    result = false;
   }
 
-  res.json({ result })
-})
-module.exports = router
+  res.json({ result });
+});
+module.exports = router;

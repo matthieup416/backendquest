@@ -4,18 +4,17 @@ var UserModel = require("../models/users");
 var ConversationModel = require("../models/conversations");
 const { ObjectId } = require("mongodb");
 
-router.get("/inbox", async function (req, res, next) {
+//Route qui récupère toutes les quêtes de l'utilisateur pour créer le picker avec la liste des quêtes
+router.get("/", async function (req, res, next) {
   var token = req.query.token;
-  // chercher toutes les quetes de l'uilisateur
-  var listQuest = await UserModel.aggregate([{ $match: { token: "6iHdoksmwLx5izQHrQg6Y3nFKPOLWe4u" } }, { $project: { quests: 1 } }]);
-
+  // chercher toutes les quetes de l'uilisateur et on ne selectionne que les champs dont on a besoin
+  var listQuest = await UserModel.find({ token: token }).select("quests._id quests.cities quests.min_price quests.max_price");
   res.json({ listQuest: listQuest[0].quests });
 });
 
 router.get("/selectedQuest", async function (req, res, next) {
   var id = req.query.id;
-  console.log("id", id);
-
+  var token = req.query.token;
   //On récupére toutes les conversations, avec le dernier messages, le nom de l'utilisateur du dernier message.
   var listDiscussion = await ConversationModel.aggregate([
     { $match: { quest_id: ObjectId(id) } }, //Cherche toutes les conversations dont l'id de la quête = id
@@ -24,8 +23,8 @@ router.get("/selectedQuest", async function (req, res, next) {
       $lookup: {
         //lookup permet de lier une autre collection grace au sender_id qui = users._id
         from: "users",
-        localField: "lastMessage.sender_id",
-        foreignField: "_id",
+        localField: "lastMessage.sender_token",
+        foreignField: "token",
         as: "users",
       },
     },
@@ -43,7 +42,7 @@ router.get("/selectedQuest", async function (req, res, next) {
     };
   });
   //On récupère les information de la quête sélectionnée
-  var quest = await UserModel.findOne({}, { quests: { $elemMatch: { _id: ObjectId(id) } } });
+  var quest = await UserModel.findOne({ token: token }, { quests: { $elemMatch: { _id: ObjectId(id) } } });
 
   //On met tout en forme dans un objet à envoyer au front
   var conversations = {
@@ -55,7 +54,8 @@ router.get("/selectedQuest", async function (req, res, next) {
 });
 
 router.get("/conversation", async function (req, res, next) {
-  var id = req.query._id;
+  var id = req.query.id;
+  var token = req.query.token;
   //On récupère tous les messages de la conversation selectionnée
   var messages = await ConversationModel.aggregate([
     // On récupère le document ayant l'id du Get
@@ -66,8 +66,8 @@ router.get("/conversation", async function (req, res, next) {
       //On fait la jointure avec la collection users pour récolter les informations de l'utilisateur ayant envoyé chaque message
       $lookup: {
         from: "users",
-        localField: "messages.sender_id",
-        foreignField: "_id",
+        localField: "messages.sender_token",
+        foreignField: "token",
         as: "users",
       },
     },
@@ -82,32 +82,34 @@ router.get("/conversation", async function (req, res, next) {
     },
   ]);
 
-  var quest = await UserModel.findOne({}, { quests: { $elemMatch: { _id: messages[0].quest_id } } });
+  var quest = await UserModel.findOne({ token: token }, { quests: { $elemMatch: { _id: messages[0].quest_id } } });
 
   //On met tout en forme dans un objet à envoyer au front
   var messages = {
     listMessages: messages,
     quest: quest.quests,
   };
-
   res.json({ messages });
 });
 
 router.post("/addMessage", async function (req, res, next) {
   //user (sender), user (receiver), message, conversation id
-  var newMessage = await ConversationModel.findOne({ _id: req.body.id });
+  var newMessage = null;
+  if (req.body.id) {
+    var newMessage = await ConversationModel.findOne({ _id: req.body.id });
+  }
   console.log("newMessage", newMessage);
   if (newMessage === null) {
     var newMessage = new ConversationModel({
       accepted: false,
-      sender_id: req.body.sender_id,
-      receiver_id: req.body.receiver_id,
+      sender_token: req.body.sender_token,
+      receiver_token: req.body.receiver_token,
       quest_id: req.body.quest_id,
     });
     console.log("newMessage2", newMessage);
   }
   newMessage.messages.push({
-    sender_id: req.body.sender_id,
+    sender_token: req.body.sender_token,
     text: req.body.message,
   });
 
