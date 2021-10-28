@@ -50,4 +50,23 @@ router.get("/display-offer", async function (req, res, next) {
   res.json({ offerData, sellerData })
 })
 
+router.post("/addoffer", async function (req, res, next) {
+  console.log(req.body.offer)
+  var user = await UserModel.findOne({
+    token: req.body.token,
+  })
+
+  user.offers.push(req.body.offer)
+
+  var userSaved = await user.save()
+
+  if (userSaved) {
+    result = true
+  } else {
+    result = false
+  }
+
+  res.json({ result })
+})
+
 module.exports = router
