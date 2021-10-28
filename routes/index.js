@@ -26,7 +26,6 @@ router.post("/addquest", async function (req, res, next) {
 router.get("/userDetail", async (req, res) => {
   try {
     var user = await UserModel.findOne({
-      // token: "6iHdoksmwLx5izQHrQg6Y3nFKPOLWe4u",
       token: req.query.token,
     });
     console.log(user)
