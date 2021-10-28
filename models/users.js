@@ -1,21 +1,15 @@
-const mongoose = require("mongoose")
+const mongoose = require("mongoose");
 
 const QuestSchema = mongoose.Schema({
-  cities: [
-    {
-      name: String,
-      rayon: Number,
-    },
-  ],
+  city: String,
   type: String,
   min_price: Number,
   max_price: Number,
   min_surface: Number,
   max_surface: Number,
   outdoor_surface: Number,
-  nb_piece: Number,
-  floor_type: String,
-  floor_max: Number,
+  pieces_min: Number,
+  pieces_max: Number,
   elevator: Boolean,
   garage: Boolean,
   parking: Boolean,
@@ -24,12 +18,13 @@ const QuestSchema = mongoose.Schema({
   balcony: Boolean,
   terrace: Boolean,
   is_new: Boolean,
+  is_old: Boolean,
+  created: Date,
   market_date: Date,
-  creation_date: Date,
   open_to_pro: Boolean,
   is_online: Boolean,
   social_text: String,
-})
+});
 
 const OfferSchema = mongoose.Schema({
   city: String,
@@ -39,8 +34,6 @@ const OfferSchema = mongoose.Schema({
   description: String,
   social_text: String,
   nb_piece: Number,
-  floor_type: String,
-  floor_number: Number,
   elevator: Boolean,
   garage: Boolean,
   parking: Boolean,
@@ -49,10 +42,11 @@ const OfferSchema = mongoose.Schema({
   balcony: Boolean,
   terrace: Boolean,
   outdoor_surface: Number,
-  market_date: Date,
-  creation_date: Date,
+  created: Date,
   open_to_pro: Boolean,
   is_online: Boolean,
+  is_new: Boolean,
+  is_old: Boolean,
   exclusive: Boolean,
   pictures: [
     {
@@ -60,7 +54,7 @@ const OfferSchema = mongoose.Schema({
     },
   ],
   is_sold: Boolean,
-})
+});
 
 const UserSchema = mongoose.Schema({
   firstName: String,
@@ -78,8 +72,8 @@ const UserSchema = mongoose.Schema({
   job: String,
   quests: [QuestSchema],
   offers: [OfferSchema],
-})
+});
 
-const UserModel = mongoose.model("users", UserSchema)
+const UserModel = mongoose.model("users", UserSchema);
 
-module.exports = UserModel
+module.exports = UserModel;
