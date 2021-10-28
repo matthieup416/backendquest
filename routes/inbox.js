@@ -30,6 +30,8 @@ router.get("/selectedQuest", async function (req, res, next) {
     },
   ]);
 
+  console.log("listDiscussion", listDiscussion);
+
   //On ne garde que les informations utilent à renvoyer au front (lastMessage, User firestName et avatar, et l'id de la conversation)
   var listConversation = listDiscussion.map((d) => {
     return {
