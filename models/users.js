@@ -34,7 +34,7 @@ const OfferSchema = mongoose.Schema({
   surface: Number,
   description: String,
   social_text: String,
-  nb_piece: Number,
+  nb_pieces: Number,
   elevator: Boolean,
   parking: Boolean,
   fiber_optics: Boolean,
