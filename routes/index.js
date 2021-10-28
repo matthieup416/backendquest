@@ -24,28 +24,21 @@ router.post("/addquest", async function (req, res, next) {
 })
 
 router.get("/display-offer", async function (req, res, next) {
+  var token = req.query.token
   console.log(req.query.offerId)
+
   var user = await UserModel.findOne({
-    token: req.query.token,
-  })
-  let offerData = { city: "Marseille" }
+    "offers._id": req.query.offerId,
+  }).select("offers")
 
-  res.json({ offerData })
-  /* var user = await UserModel.findOne({
-    token: req.body.token,
-  })
+  console.log(user.offers)
+  let finalOffer = user.offers.filter((e) => e._id !== req.query.offerId)
+  console.log(finalOffer)
+  // var offersObject = user.offers
 
-  user.quests.push(req.body.quest)
+  //  let array = Object(offersObject)
 
-  var userSaved = await user.save()
-
-  if (userSaved) {
-    result = true
-  } else {
-    result = false
-  } */
-
-  // res.json({ result })
+  res.json({ user })
 })
 
 module.exports = router

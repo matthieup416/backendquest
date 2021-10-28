@@ -13,7 +13,7 @@ const QuestSchema = mongoose.Schema({
   min_surface: Number,
   max_surface: Number,
   outdoor_surface: Number,
-  nb_piece: Number,
+  nb_pieces: Number,
   floor_type: String,
   floor_max: Number,
   elevator: Boolean,
