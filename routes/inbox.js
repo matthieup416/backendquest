@@ -78,6 +78,8 @@ router.get("/conversation", async function (req, res, next) {
       //On filtre les champs récoltés pour ne garder que le firstname et l'avatar du user et la quest_id associée
       $project: {
         quest_id: 1,
+        offer_id: 1,
+        seller_token: 1,
         messages: 1,
         "users.firstName": 1,
         "users.avatar": 1,
@@ -85,12 +87,12 @@ router.get("/conversation", async function (req, res, next) {
     },
   ]);
 
-  var quest = await UserModel.findOne({ token: token }, { quests: { $elemMatch: { _id: messages[0].quest_id } } });
+  var offer = await UserModel.findOne({ token: messages[0].seller_token }, { offers: { $elemMatch: { _id: messages[0].offer_id } } });
 
   //On met tout en forme dans un objet à envoyer au front
   var messages = {
     listMessages: messages,
-    quest: quest.quests,
+    offer: offer.offers,
   };
   res.json({ messages });
 });
@@ -105,9 +107,10 @@ router.post("/addMessage", async function (req, res, next) {
   if (newMessage === null) {
     var newMessage = new ConversationModel({
       accepted: false,
-      sender_token: req.body.sender_token,
-      receiver_token: req.body.receiver_token,
+      buyer_token: req.body.sender_token,
+      seller_token: req.body.receiver_token,
       quest_id: req.body.quest_id,
+      offer_id: req.body.offer_id,
     });
     console.log("newMessage2", newMessage);
   }

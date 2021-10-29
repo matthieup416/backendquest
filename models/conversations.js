@@ -9,8 +9,8 @@ const MessageSchema = mongoose.Schema({
 const ConversationSchema = mongoose.Schema({
   accepted: Boolean,
   offer_id: { type: mongoose.Schema.Types.ObjectId, ref: "offers" },
-  sender_token: String,
-  receiver_token: String,
+  buyer_token: String,
+  seller_token: String,
   quest_id: { type: mongoose.Schema.Types.ObjectId, ref: "offers" },
   messages: [MessageSchema],
 });

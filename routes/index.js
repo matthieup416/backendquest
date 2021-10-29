@@ -40,7 +40,7 @@ router.get("/results", async function (req, res, next) {
       $gte: quest.min_price,
       $lte: quest.max_price,
     },
-    "offers.nb_piece": {
+    "offers.nb_pieces": {
       $gte: quest.pieces_min,
       $lte: quest.pieces_max,
     },
@@ -93,9 +93,10 @@ router.get("/results", async function (req, res, next) {
         verified: 1,
         "offers.city": 1,
         "offers.type": 1,
-        "offers.nb_piece": 1,
+        "offers.nb_pieces": 1,
         "offers.price": 1,
         "offers.surface": 1,
+        "offers.created": 1,
       },
     },
   ]);
