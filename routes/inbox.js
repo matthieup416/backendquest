@@ -107,6 +107,7 @@ router.get("/conversation", async function (req, res, next) {
 
 router.post("/addMessage", async function (req, res, next) {
   //user (sender), user (receiver), message, conversation id
+  console.log(req.body)
   var newMessage = null
   if (req.body.id) {
     var newMessage = await ConversationModel.findOne({ _id: req.body.id })
