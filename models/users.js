@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 
 const QuestSchema = mongoose.Schema({
   city: String,
+  rayon: Number,
   type: String,
   min_price: Number,
   max_price: Number,
@@ -13,12 +14,12 @@ const QuestSchema = mongoose.Schema({
   elevator: Boolean,
   garage: Boolean,
   parking: Boolean,
+  is_old: Boolean,
+  is_new: Boolean,
   fiber_optics: Boolean,
   pool: Boolean,
   balcony: Boolean,
   terrace: Boolean,
-  is_new: Boolean,
-  is_old: Boolean,
   created: Date,
   market_date: Date,
   open_to_pro: Boolean,
@@ -33,9 +34,8 @@ const OfferSchema = mongoose.Schema({
   surface: Number,
   description: String,
   social_text: String,
-  nb_piece: Number,
+  nb_pieces: Number,
   elevator: Boolean,
-  garage: Boolean,
   parking: Boolean,
   fiber_optics: Boolean,
   pool: Boolean,
@@ -54,6 +54,8 @@ const OfferSchema = mongoose.Schema({
     },
   ],
   is_sold: Boolean,
+  is_new: Boolean,
+  is_old: Boolean,
 });
 
 const UserSchema = mongoose.Schema({
