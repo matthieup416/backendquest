@@ -58,25 +58,25 @@ router.get("/results", async function (req, res, next) {
   };
 
   //Si on cherche du neuf et du vieux on ajoute une condition "or"
-  if (quest.is_new && quest.is_old) {
+  if ((quest.is_new && quest.is_old) || (!quest.is_new && !quest.is_old)) {
     options["$or"] = [{ "offers.is_new": true }, { "offers.is_old": true }];
   } else {
     options["offers.is_new"] = quest.is_new;
     options["offers.is_old"] = quest.is_old;
   }
-
+  //Si on a une date market_date, on souhaite seulement les offres plus récente ou = à cette date
   if (quest.market_date) {
-    options["offers.market_date"] = "";
+    options["offers.created"] = { $gte: new Date(quest.market_date) };
   }
 
   console.log(options);
-  console.log("date", new Date());
-  console.log("date", new Date("2021-10-17T07:55:06"));
 
   var listOffers = await UserModel.aggregate([
     {
       $project: {
         firstName: 1,
+        is_pro: 1,
+        verified: 1,
         offers: 1,
       },
     },
@@ -84,9 +84,22 @@ router.get("/results", async function (req, res, next) {
     {
       $match: options,
     },
+    { $sort: { "offers.created": -1 } },
+    {
+      $project: {
+        firstName: 1,
+        is_pro: 1,
+        verified: 1,
+        "offers.city": 1,
+        "offers.type": 1,
+        "offers.nb_piece": 1,
+        "offers.price": 1,
+        "offers.surface": 1,
+      },
+    },
   ]);
 
-  res.json({ listOffers });
+  res.json({ listOffers, quest });
 });
 
 module.exports = router;

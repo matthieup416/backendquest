@@ -65,11 +65,11 @@ const UserSchema = mongoose.Schema({
   token: String,
   id_card: String,
   avatar: String,
-  category: String,
-  type: String,
-  verified: Boolean,
+  category: String, //acheteur ou vendeur ---> retiré
+  is_pro: Boolean, // pro ou particulier
+  verified: Boolean, //Si particulier vérifié
   description: String,
-  job: String,
+  job: String, //profil acheteur
   quests: [QuestSchema],
   offers: [OfferSchema],
 });
