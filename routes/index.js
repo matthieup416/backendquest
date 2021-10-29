@@ -30,7 +30,7 @@ router.get("/results", async function (req, res, next) {
 
   var quest = await UserModel.findOne({ token: token }, { quests: { $elemMatch: { _id: quest_id } } });
   quest = quest.quests[0];
-  console.log(quest);
+  console.log("quest", quest);
 
   //On créé le tableau de condition avant de lancer la requête car on souhaite le modifier dynamiquement pour les checkbox is_new, is_old et si on a une market_date
   var options = {
@@ -97,9 +97,13 @@ router.get("/results", async function (req, res, next) {
         "offers.price": 1,
         "offers.surface": 1,
         "offers.created": 1,
+        "offers.pictures": 1,
+        "offers._id": 1,
       },
     },
   ]);
+
+  console.log("listOffers", listOffers);
 
   res.json({ listOffers, quest });
 });
