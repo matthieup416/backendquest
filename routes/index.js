@@ -103,15 +103,15 @@ router.get("/results", async function (req, res, next) {
     },
   ]);
 
-  console.log("listOffers", listOffers);
-
   res.json({ listOffers, quest });
 });
 
 router.get("/display-offer", async function (req, res, next) {
   var id = req.query.offerId;
+  console.log("offerId", id);
 
   var offer = await UserModel.findOne({ "offers._id": id }, { offers: { $elemMatch: { _id: ObjectId(id) } } });
+  console.log(offer);
   // on sélectionne uniquement les données de l'annonce
   let offerData = offer.offers[0];
 
