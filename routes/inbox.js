@@ -105,6 +105,7 @@ router.get("/conversation", async function (req, res, next) {
 
 router.post("/addMessage", async function (req, res, next) {
   //user (sender), user (receiver), message, conversation id
+  console.log(req.body)
   var newMessage = null
   if (req.body.id) {
     var newMessage = await ConversationModel.findOne({ _id: req.body.id })
@@ -113,9 +114,10 @@ router.post("/addMessage", async function (req, res, next) {
   if (newMessage === null) {
     var newMessage = new ConversationModel({
       accepted: false,
-      sender_token: req.body.sender_token,
-      receiver_token: req.body.receiver_token,
+      buyer_token: req.body.buyer_token,
+      seller_token: req.body.seller_token,
       quest_id: req.body.quest_id,
+      offer_id: req.body.offer_id,
     })
     console.log("newMessage2", newMessage)
   }
