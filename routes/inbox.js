@@ -18,14 +18,30 @@ router.get("/selectedQuest", async function (req, res, next) {
   //On récupére toutes les conversations, avec le dernier messages, le nom de l'utilisateur du dernier message.
   var listDiscussion = await ConversationModel.aggregate([
     { $match: { quest_id: ObjectId(id) } }, //Cherche toutes les conversations dont l'id de la quête = id
-    { $project: { quest_id: 1, offer_id: 1, lastMessage: { $slice: ["$messages", -1] } } }, // On ne garde que le dernier message, le project permet de ne garder que les champs que l'on veux, le slice permet de ne prendre que le dernier element du tableau des messages de la conversation
+    {
+      $project: {
+        quest_id: 1,
+        offer_id: 1,
+        lastMessage: {
+          $slice: ["$messages", -1],
+        },
+      },
+    },
     {
       $lookup: {
-        //lookup permet de lier une autre collection grace au sender_token qui = users.token
         from: "users",
         localField: "offer_id",
         foreignField: "offers._id",
         as: "users",
+      },
+    },
+    {
+      $project: {
+        quest_id: 1,
+        offer_id: 1,
+        lastMessage: 1,
+        "users.firstName": 1,
+        "users.avatar": 1,
       },
     },
   ]);
@@ -33,21 +49,25 @@ router.get("/selectedQuest", async function (req, res, next) {
   console.log("listDiscussion", listDiscussion);
 
   //On ne garde que les informations utilent à renvoyer au front (lastMessage, User firestName et avatar, et l'id de la conversation)
-  var listConversation = listDiscussion.map((d) => {
-    return {
-      lastMessage: d.lastMessage[0],
-      user: {
-        firstName: d.users[0].firstName,
-        avatar: d.users[0].avatar,
-      },
-      _id: d._id,
-    };
-  });
-
-  console.log(listDiscussion[0].users);
+  // var listConversation = listDiscussion.map((d) => {
+  //   return {
+  //     lastMessage: d.lastMessage[0],
+  //     user: {
+  //       firstName: d.users[0].firstName,
+  //       avatar: d.users[0].avatar,
+  //     },
+  //     _id: d._id,
+  //     offer_id: d.offer_id,
+  //     seller_token: d.seller_token,
+  //   };
+  // });
 
   //On récupère les information de la quête sélectionnée
-  var quest = await UserModel.findOne({ token: token }, { quests: { $elemMatch: { _id: ObjectId(id) } } });
+  // var quest = await UserModel.findOne({ token: token }, { quests: { $elemMatch: { _id: ObjectId(id) } } });
+
+  var offer = await UserModel.findOne({ token: listConversation[0].seller_token }, { offers: { $elemMatch: { _id: ObjectId(listConversation[0].offer_id) } } }).select("offers[0].city");
+
+  console.log("offer", offer);
 
   //On met tout en forme dans un objet à envoyer au front
   var conversations = {
