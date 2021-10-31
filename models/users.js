@@ -29,6 +29,8 @@ const QuestSchema = mongoose.Schema({
 
 const OfferSchema = mongoose.Schema({
   city: String,
+  latitude: Number,
+  longitude: Number,
   type: String,
   price: Number,
   surface: Number,
