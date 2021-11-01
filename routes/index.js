@@ -34,9 +34,25 @@ router.get("/results", async function (req, res, next) {
   quest = quest.quests[0];
   console.log("quest", quest);
 
+  const apiURL = `http://api.positionstack.com/v1/forward?access_key=2373330d53389309f778b537f08b4603&query=${quest.city}`;
+  const apiResponse = await axios.get(apiURL);
+  console.log("apiResponse", apiResponse.data.data);
+  const cityCoord = apiResponse.data.data[0];
+  var latitudeMin = cityCoord.latitude - (quest.rayon * 0.01) / 1.11;
+  var latitudeMax = cityCoord.latitude + (quest.rayon * 0.01) / 1.11;
+  var longitudeMin = cityCoord.longitude - (quest.rayon * 0.01) / 1.11;
+  var longitudeMax = cityCoord.longitude + (quest.rayon * 0.01) / 1.11;
+
   //On créé le tableau de condition avant de lancer la requête car on souhaite le modifier dynamiquement pour les checkbox is_new, is_old et si on a une market_date
   var options = {
-    "offers.city": quest.city,
+    "offers.latitude": {
+      $gte: latitudeMin,
+      $lte: latitudeMax,
+    },
+    "offers.longitude": {
+      $gte: longitudeMin,
+      $lte: longitudeMax,
+    },
     "offers.type": quest.type,
     "offers.price": {
       $gte: quest.min_price,
