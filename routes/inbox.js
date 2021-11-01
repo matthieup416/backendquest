@@ -7,11 +7,9 @@ const { ObjectId } = require("mongodb");
 //Route qui récupère toutes les quêtes de l'utilisateur pour créer le picker avec la liste des quêtes
 router.get("/", async function (req, res, next) {
   var token = req.query.token;
-  console.log("token", token);
 
   // chercher toutes les quetes de l'uilisateur et on ne selectionne que les champs dont on a besoin
-  var listQuest = await UserModel.find({ token: token }).select("quests._id quests.city quests.min_price quests.max_price");
-  console.log("listQuest", listQuest);
+  var listQuest = await UserModel.find({ token: token }).select("quests._id quests.city quests.min_price quests.max_price quests.min_surface quests.max_surface quests.type");
 
   res.json({ listQuest: listQuest[0].quests });
 });
@@ -62,14 +60,12 @@ router.get("/selectedQuest", async function (req, res, next) {
     },
   ]);
 
-  console.log("conversations", conversations);
-
   res.json({ conversations });
 });
 
 router.get("/conversation", async function (req, res, next) {
   var id = req.query.id;
-  var token = req.query.token;
+
   //On récupère tous les messages de la conversation selectionnée
   var messages = await ConversationModel.aggregate([
     // On récupère le document ayant l'id du Get
@@ -110,12 +106,10 @@ router.get("/conversation", async function (req, res, next) {
 
 router.post("/addMessage", async function (req, res, next) {
   //user (sender), user (receiver), message, conversation id
-  console.log(req.body);
   var newMessage = null;
   if (req.body.id) {
     var newMessage = await ConversationModel.findOne({ _id: req.body.id });
   }
-  console.log("newMessage", newMessage);
   if (newMessage === null) {
     var newMessage = new ConversationModel({
       accepted: false,
@@ -124,7 +118,6 @@ router.post("/addMessage", async function (req, res, next) {
       quest_id: req.body.quest_id,
       offer_id: req.body.offer_id,
     });
-    console.log("newMessage2", newMessage);
   }
   newMessage.messages.push({
     sender_token: req.body.sender_token,
@@ -133,7 +126,6 @@ router.post("/addMessage", async function (req, res, next) {
 
   var messageSaved = await newMessage.save();
 
-  console.log("messageSaved", messageSaved);
   var result = false;
   if (messageSaved) {
     result = true;
