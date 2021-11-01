@@ -29,6 +29,8 @@ const QuestSchema = mongoose.Schema({
 
 const OfferSchema = mongoose.Schema({
   city: String,
+  latitude: Number,
+  longitude: Number,
   type: String,
   price: Number,
   surface: Number,
@@ -45,6 +47,8 @@ const OfferSchema = mongoose.Schema({
   created: Date,
   open_to_pro: Boolean,
   is_online: Boolean,
+  is_new: Boolean,
+  is_old: Boolean,
   exclusive: Boolean,
   pictures: [
     {
@@ -65,11 +69,10 @@ const UserSchema = mongoose.Schema({
   token: String,
   id_card: String,
   avatar: String,
-  category: String,
-  type: String,
+  is_pro: Boolean,
   verified: Boolean,
   description: String,
-  job: String,
+  job: String, //profil acheteur
   quests: [QuestSchema],
   offers: [OfferSchema],
 })

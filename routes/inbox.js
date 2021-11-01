@@ -9,54 +9,58 @@ router.get("/", async function (req, res, next) {
   var token = req.query.token
   // chercher toutes les quetes de l'uilisateur et on ne selectionne que les champs dont on a besoin
   var listQuest = await UserModel.find({ token: token }).select(
-    "quests._id quests.cities quests.min_price quests.max_price"
+    "quests._id quests.city quests.min_price quests.max_price"
   )
   res.json({ listQuest: listQuest[0].quests })
 })
 
 router.get("/selectedQuest", async function (req, res, next) {
-  var id = req.query.id
+  var id = req.query.id //Quest_id
   var token = req.query.token
   //On récupére toutes les conversations, avec le dernier messages, le nom de l'utilisateur du dernier message.
-  var listDiscussion = await ConversationModel.aggregate([
-    { $match: { quest_id: ObjectId(id) } }, //Cherche toutes les conversations dont l'id de la quête = id
-    { $project: { quest_id: 1, lastMessage: { $slice: ["$messages", -1] } } }, // On ne garde que le dernier message, le project permet de ne garder que les champs que l'on veux, le slice permet de ne prendre que le dernier element du tableau des messages de la conversation
+
+  var conversations = await ConversationModel.aggregate([
+    {
+      $match: {
+        quest_id: ObjectId(id),
+      },
+    },
     {
       $lookup: {
-        //lookup permet de lier une autre collection grace au sender_id qui = users._id
         from: "users",
-        localField: "lastMessage.sender_token",
-        foreignField: "token",
-        as: "users",
+        localField: "offer_id",
+        foreignField: "offers._id",
+        as: "seller",
+      },
+    },
+    {
+      $unwind: {
+        path: "$seller",
+      },
+    },
+    {
+      $project: {
+        quest_id: 1,
+        offer_id: 1,
+        "seller.firstName": 1,
+        "seller.avatar": 1,
+        lastMessage: {
+          $slice: ["$messages", -1],
+        },
+        offer: {
+          $filter: {
+            input: "$seller.offers",
+            as: "offer",
+            cond: {
+              $eq: ["$$offer._id", "$offer_id"],
+            },
+          },
+        },
       },
     },
   ])
 
-  console.log("listDiscussion", listDiscussion)
-
-  //On ne garde que les informations utilent à renvoyer au front (lastMessage, User firestName et avatar, et l'id de la conversation)
-  var listConversation = listDiscussion.map((d) => {
-    console.log(d)
-    return {
-      lastMessage: d.lastMessage[0],
-      user: {
-        firstName: d.users[0].firstName,
-        avatar: d.users[0].avatar,
-      },
-      _id: d._id,
-    }
-  })
-  //On récupère les information de la quête sélectionnée
-  var quest = await UserModel.findOne(
-    { token: token },
-    { quests: { $elemMatch: { _id: ObjectId(id) } } }
-  )
-
-  //On met tout en forme dans un objet à envoyer au front
-  var conversations = {
-    conversation: listConversation,
-    quest: quest.quests,
-  }
+  console.log("conversations", conversations)
 
   res.json({ conversations })
 })
@@ -83,6 +87,8 @@ router.get("/conversation", async function (req, res, next) {
       //On filtre les champs récoltés pour ne garder que le firstname et l'avatar du user et la quest_id associée
       $project: {
         quest_id: 1,
+        offer_id: 1,
+        seller_token: 1,
         messages: 1,
         "users.firstName": 1,
         "users.avatar": 1,
@@ -90,21 +96,22 @@ router.get("/conversation", async function (req, res, next) {
     },
   ])
 
-  var quest = await UserModel.findOne(
-    { token: token },
-    { quests: { $elemMatch: { _id: messages[0].quest_id } } }
+  var offer = await UserModel.findOne(
+    { token: messages[0].seller_token },
+    { offers: { $elemMatch: { _id: messages[0].offer_id } } }
   )
 
   //On met tout en forme dans un objet à envoyer au front
   var messages = {
     listMessages: messages,
-    quest: quest.quests,
+    offer: offer.offers,
   }
   res.json({ messages })
 })
 
 router.post("/addMessage", async function (req, res, next) {
   //user (sender), user (receiver), message, conversation id
+  console.log(req.body)
   var newMessage = null
   if (req.body.id) {
     var newMessage = await ConversationModel.findOne({ _id: req.body.id })
@@ -113,9 +120,10 @@ router.post("/addMessage", async function (req, res, next) {
   if (newMessage === null) {
     var newMessage = new ConversationModel({
       accepted: false,
-      sender_token: req.body.sender_token,
-      receiver_token: req.body.receiver_token,
+      buyer_token: req.body.sender_token,
+      seller_token: req.body.receiver_token,
       quest_id: req.body.quest_id,
+      offer_id: req.body.offer_id,
     })
     console.log("newMessage2", newMessage)
   }
