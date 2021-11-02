@@ -295,4 +295,102 @@ router.get("/resultsmap", async function (req, res, next) {
   res.json({ listOffers, quest, cityCoord });
 });
 
+router.get("/countresults", async function (req, res, next) {
+  var token = req.query.token;
+  var quest_id = req.query.quest_id;
+
+  var quest = await UserModel.findOne({ token: token }, { quests: { $elemMatch: { _id: quest_id } } });
+  quest = quest.quests[0];
+
+  const apiURL = `http://api.positionstack.com/v1/forward?access_key=2373330d53389309f778b537f08b4603&query=${quest.city}`;
+  const apiResponse = await axios.get(apiURL);
+  const cityCoord = apiResponse.data.data[0];
+  var latitudeMin = cityCoord.latitude - (quest.rayon * 0.01) / 1.11;
+  var latitudeMax = cityCoord.latitude + (quest.rayon * 0.01) / 1.11;
+  var longitudeMin = cityCoord.longitude - (quest.rayon * 0.01) / 1.11;
+  var longitudeMax = cityCoord.longitude + (quest.rayon * 0.01) / 1.11;
+
+  //On créé le tableau de condition avant de lancer la requête car on souhaite le modifier dynamiquement pour les checkbox is_new, is_old et si on a une market_date
+  var options = {
+    "offers.latitude": {
+      $gte: latitudeMin,
+      $lte: latitudeMax,
+    },
+    "offers.longitude": {
+      $gte: longitudeMin,
+      $lte: longitudeMax,
+    },
+    "offers.type": quest.type,
+    "offers.price": {
+      $gte: quest.min_price,
+      $lte: quest.max_price,
+    },
+    "offers.surface": {
+      $gte: quest.min_surface,
+      $lte: quest.max_surface,
+    },
+    "offers.elevator": quest.elevator,
+    "offers.parking": quest.parking,
+    "offers.fiber_optics": quest.fiber_optics,
+    "offers.pool": quest.pool,
+    "offers.balcony": quest.balcony,
+    "offers.terrace": quest.terrace,
+    "offers.is_online": true,
+    "offers.is_sold": false,
+  };
+
+  //Si on cherche du neuf et du vieux on ajoute une condition "or"
+  if ((quest.is_new && quest.is_old) || (!quest.is_new && !quest.is_old)) {
+    options["$or"] = [{ "offers.is_new": true }, { "offers.is_old": true }];
+  } else {
+    options["offers.is_new"] = quest.is_new;
+    options["offers.is_old"] = quest.is_old;
+  }
+  //Si on a une date market_date, on souhaite seulement les offres plus récente ou = à cette date
+  if (quest.market_date) {
+    options["offers.created"] = { $gte: new Date(quest.market_date) };
+  }
+
+  if (quest.pieces_max === 6) {
+    options["offers.nb_pieces"] = { $gte: quest.pieces_min };
+  } else {
+    options["offers.nb_pieces"] = {
+      $gte: quest.pieces_min,
+      $lte: quest.pieces_max,
+    };
+  }
+  var listOffers = await UserModel.aggregate([
+    {
+      $project: {
+        firstName: 1,
+        is_pro: 1,
+        verified: 1,
+        offers: 1,
+      },
+    },
+    { $unwind: { path: "$offers" } },
+    {
+      $match: options,
+    },
+    { $sort: { "offers.created": -1 } },
+    {
+      $project: {
+        firstName: 1,
+        is_pro: 1,
+        verified: 1,
+        "offers.city": 1,
+        "offers.type": 1,
+        "offers.nb_pieces": 1,
+        "offers.price": 1,
+        "offers.surface": 1,
+        "offers.created": 1,
+        "offers.pictures": 1,
+        "offers._id": 1,
+      },
+    },
+  ]);
+
+  res.json({ listOffers: listOffers.length });
+});
+
 module.exports = router;
