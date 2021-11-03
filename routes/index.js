@@ -417,7 +417,6 @@ router.get("/countresults", async function (req, res, next) {
   res.json({ listOffers: listOffers.length })
 })
 
-<<<<<<< HEAD
 var cloudinary = require("cloudinary").v2;
 cloudinary.config({
   cloud_name: "dppkmed1y",
@@ -444,6 +443,3 @@ router.post("/upload", async function (req, res, next) {
 });
 
 module.exports = router;
-=======
-module.exports = router
->>>>>>> 24d4168fbe759c15931bb10b723c7efcd23104b1
