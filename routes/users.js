@@ -6,7 +6,7 @@ var bcrypt = require("bcrypt")
 
 var UserModel = require("../models/users")
 
-// Inscription 
+// Inscription
 
 router.post("/sign-up", async function (req, res, next) {
   var error = []
@@ -61,7 +61,7 @@ router.post("/sign-up", async function (req, res, next) {
 router.post("/sign-in", async function (req, res, next) {
   var result = false
   var error = []
-
+  console.log(req.body)
   var dataUser = {
     token: "",
     firstName: "",
