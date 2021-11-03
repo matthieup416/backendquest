@@ -409,11 +409,12 @@ router.post("/upload", async function (req, res, next) {
 
   if (!resultCopy) {
     var resultCloudinary = await cloudinary.uploader.upload(pictureName);
-    console.log("token", req.body.token);
 
-    UserModel.updateOne({ token: req.body.token }, { avatar: resultCloudinary.url });
+    var user = await UserModel.findOneAndUpdate({ token: req.body.token }, { avatar: resultCloudinary.url }, { new: true });
 
-    res.json({ result: true });
+    console.log("user", user);
+
+    res.json({ url: resultCloudinary.url, result: true });
   } else {
     res.json({ error: resultCopy, result: false });
   }
