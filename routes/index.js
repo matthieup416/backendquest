@@ -2,6 +2,9 @@ var mongoose = require("mongoose");
 var express = require("express");
 const axios = require("axios");
 
+var uniqid = require("uniqid");
+var fs = require("fs");
+
 var router = express.Router();
 var UserModel = require("../models/users");
 const { ObjectId } = require("mongodb");
@@ -391,6 +394,31 @@ router.get("/countresults", async function (req, res, next) {
   ]);
 
   res.json({ listOffers: listOffers.length });
+});
+
+var cloudinary = require("cloudinary").v2;
+cloudinary.config({
+  cloud_name: "dppkmed1y",
+  api_key: "268693392323966",
+  api_secret: "N0ORgeJRU0z914NPPEBKnH3aJ-I",
+});
+
+router.post("/upload", async function (req, res, next) {
+  var pictureName = "./tmp/" + uniqid() + ".jpg";
+  var resultCopy = await req.files.avatar.mv(pictureName);
+
+  if (!resultCopy) {
+    var resultCloudinary = await cloudinary.uploader.upload(pictureName);
+    console.log("token", req.body.token);
+
+    UserModel.updateOne({ token: req.body.token }, { avatar: resultCloudinary.url });
+
+    res.json({ result: true });
+  } else {
+    res.json({ error: resultCopy, result: false });
+  }
+
+  fs.unlinkSync(pictureName);
 });
 
 module.exports = router;
