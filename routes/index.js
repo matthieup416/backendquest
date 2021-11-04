@@ -208,7 +208,7 @@ router.get("/resultsmap", async function (req, res, next) {
   // On utilise la librairie AXIOS pour faire des calls API depuis notre backend
   const apiURL = `http://api.positionstack.com/v1/forward?access_key=2373330d53389309f778b537f08b4603&query=${quest.city}`;
   const apiResponse = await axios.get(apiURL);
-  console.log("apiResponse", apiResponse.data.data);
+  // console.log("apiResponse", apiResponse.data.data);
   const cityCoord = apiResponse.data.data[0];
   var latitudeMin = cityCoord.latitude - (quest.rayon * 0.01) / 1.11;
   var latitudeMax = cityCoord.latitude + (quest.rayon * 0.01) / 1.11;
