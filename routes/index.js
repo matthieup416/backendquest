@@ -11,7 +11,7 @@ const { ObjectId } = require("mongodb");
 const { response } = require("express");
 
 router.post("/addquest", async function (req, res, next) {
-  console.log(req.body.quest);
+  // console.log(req.body.quest);
   var user = await UserModel.findOne({
     token: req.body.token,
   });
@@ -35,11 +35,11 @@ router.get("/results", async function (req, res, next) {
 
   var quest = await UserModel.findOne({ token: token }, { quests: { $elemMatch: { _id: quest_id } } });
   quest = quest.quests[0];
-  console.log("quest", quest);
+  // console.log("quest", quest);
 
   const apiURL = `http://api.positionstack.com/v1/forward?access_key=2373330d53389309f778b537f08b4603&query=${quest.city}`;
   const apiResponse = await axios.get(apiURL);
-  console.log("apiResponse", apiResponse.data.data);
+  // console.log("apiResponse", apiResponse.data.data);
   const cityCoord = apiResponse.data.data[0];
   var latitudeMin = cityCoord.latitude - (quest.rayon * 0.01) / 1.11;
   var latitudeMax = cityCoord.latitude + (quest.rayon * 0.01) / 1.11;
@@ -134,17 +134,17 @@ router.get("/results", async function (req, res, next) {
 
 router.get("/display-offer", async function (req, res, next) {
   var id = req.query.offerId;
-  console.log("offerId", id);
+  // console.log("offerId", id);
 
   var offer = await UserModel.findOne({ "offers._id": id }, { offers: { $elemMatch: { _id: ObjectId(id) } } });
-  console.log(offer);
+  // console.log(offer);
   // on sélectionne uniquement les données de l'annonce
   let offerData = offer.offers[0];
 
   // je vais récupérer le firstname, le is_pro et l'avatar du user qui a publié l'offre
   var sellerId = offer._id;
   var seller = await UserModel.findOne({ _id: sellerId });
-  console.log(seller.is_pro);
+  // console.log(seller.is_pro);
   let sellerData = {
     sellerToken: seller.token,
     sellerId: seller._id,
@@ -208,7 +208,7 @@ router.get("/resultsmap", async function (req, res, next) {
   // On utilise la librairie AXIOS pour faire des calls API depuis notre backend
   const apiURL = `http://api.positionstack.com/v1/forward?access_key=2373330d53389309f778b537f08b4603&query=${quest.city}`;
   const apiResponse = await axios.get(apiURL);
-  // console.log("apiResponse", apiResponse.data.data);
+  console.log("apiResponse", apiResponse.data.data);
   const cityCoord = apiResponse.data.data[0];
   var latitudeMin = cityCoord.latitude - (quest.rayon * 0.01) / 1.11;
   var latitudeMax = cityCoord.latitude + (quest.rayon * 0.01) / 1.11;
@@ -297,7 +297,7 @@ router.get("/resultsmap", async function (req, res, next) {
       },
     },
   ]);
-  console.log("cityCoord", cityCoord);
+  // console.log("cityCoord", cityCoord);
   res.json({ listOffers, quest, cityCoord });
 });
 
@@ -415,7 +415,7 @@ router.post("/upload", async function (req, res, next) {
 
     var user = await UserModel.findOneAndUpdate({ token: req.body.token }, { avatar: resultCloudinary.url }, { new: true });
 
-    console.log("user", user);
+    // console.log("user", user);
 
     res.json({ url: resultCloudinary.url, result: true });
   } else {
