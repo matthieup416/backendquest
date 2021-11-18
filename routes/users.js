@@ -43,8 +43,6 @@ router.post("/sign-up", async function (req, res, next) {
       token: uid2(32),
     })
 
-    var dataUser = newUser
-
     saveUser = await newUser.save()
 
     if (saveUser) {
@@ -53,7 +51,7 @@ router.post("/sign-up", async function (req, res, next) {
     }
   }
 
-  res.json({ result, saveUser, error, token, dataUser })
+  res.json({ result, dataUser: saveUser, error, token })
 })
 
 // Connexion
