@@ -303,7 +303,7 @@ router.get("/countresults", async function (req, res, next) {
     },
   ])
   console.log("offersCount", listOffers.length)
-  res.json({ offersCount: listOffers.length })
+  res.json({ listOffers: listOffers.length })
 })
 
 var cloudinary = require("cloudinary").v2
