@@ -30,7 +30,6 @@ router.post("/addquest", async function (req, res, next) {
 })
 
 router.get("/results", async function (req, res, next) {
-  console.log("route results sollicitee")
   var token = req.query.token
   var quest_id = req.query.quest_id
 
@@ -100,8 +99,6 @@ router.get("/results", async function (req, res, next) {
     }
   }
 
-  console.log(options)
-
   var listOffers = await UserModel.aggregate([
     {
       $project: {
@@ -133,7 +130,7 @@ router.get("/results", async function (req, res, next) {
     },
   ])
 
-  res.json({ listOffers, quest })
+  res.json({ listOffers, quest, cityCoord })
 })
 
 router.get("/display-offer", async function (req, res, next) {
