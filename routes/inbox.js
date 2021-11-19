@@ -1,22 +1,24 @@
-var express = require("express");
-var router = express.Router();
-var UserModel = require("../models/users");
-var ConversationModel = require("../models/conversations");
-const { ObjectId } = require("mongodb");
+var express = require("express")
+var router = express.Router()
+var UserModel = require("../models/users")
+var ConversationModel = require("../models/conversations")
+const { ObjectId } = require("mongodb")
 
 //Route qui récupère toutes les quêtes de l'utilisateur pour créer le picker avec la liste des quêtes
 router.get("/", async function (req, res, next) {
-  var token = req.query.token;
+  var token = req.query.token
 
   // chercher toutes les quetes de l'uilisateur et on ne selectionne que les champs dont on a besoin
-  var listQuest = await UserModel.find({ token: token }).select("quests._id quests.city quests.min_price quests.max_price quests.min_surface quests.max_surface quests.type");
+  var listQuest = await UserModel.find({ token: token }).select(
+    "quests._id quests.city quests.min_price quests.max_price quests.min_surface quests.max_surface quests.type"
+  )
 
-  res.json({ listQuest: listQuest[0].quests });
-});
+  res.json({ listQuest: listQuest[0].quests })
+})
 
 router.get("/selectedQuest", async function (req, res, next) {
-  var id = req.query.id; //Quest_id
-  var token = req.query.token;
+  var id = req.query.id //Quest_id
+  var token = req.query.token
   //On récupére toutes les conversations, avec le dernier messages, le nom de l'utilisateur du dernier message.
 
   var conversations = await ConversationModel.aggregate([
@@ -58,18 +60,18 @@ router.get("/selectedQuest", async function (req, res, next) {
         },
       },
     },
-  ]);
+  ])
 
-  res.json({ conversations });
-});
+  res.json({ conversations })
+})
 
 router.get("/conversation", async function (req, res, next) {
-  var id = req.query.id;
-  console.log("/conversation");
-  console.log("/conversation");
-  console.log("/conversation");
-  console.log("/conversation");
-  console.log("/conversation");
+  var id = req.query.id
+  console.log("/conversation")
+  console.log("/conversation")
+  console.log("/conversation")
+  console.log("/conversation")
+  console.log("/conversation")
 
   //On récupère tous les messages de la conversation selectionnée
   var messages = await ConversationModel.aggregate([
@@ -97,25 +99,28 @@ router.get("/conversation", async function (req, res, next) {
         "users.avatar": 1,
       },
     },
-  ]);
+  ])
 
-  console.log("/Conversation messages", messages);
+  console.log("/Conversation messages", messages)
 
-  var offer = await UserModel.findOne({ token: messages[0].seller_token }, { offers: { $elemMatch: { _id: messages[0].offer_id } } });
+  var offer = await UserModel.findOne(
+    { token: messages[0].seller_token },
+    { offers: { $elemMatch: { _id: messages[0].offer_id } } }
+  )
 
   //On met tout en forme dans un objet à envoyer au front
   var messages = {
     listMessages: messages,
     offer: offer.offers,
-  };
-  res.json({ messages });
-});
+  }
+  res.json({ messages })
+})
 
 router.post("/addMessage", async function (req, res, next) {
   //user (sender), user (receiver), message, conversation id
-  var newMessage = null;
+  var newMessage = null
   if (req.body.id) {
-    var newMessage = await ConversationModel.findOne({ _id: req.body.id });
+    var newMessage = await ConversationModel.findOne({ _id: req.body.id })
   }
   if (newMessage === null) {
     var newMessage = new ConversationModel({
@@ -124,21 +129,22 @@ router.post("/addMessage", async function (req, res, next) {
       seller_token: req.body.seller_token,
       quest_id: req.body.quest_id,
       offer_id: req.body.offer_id,
-    });
+    })
   }
   newMessage.messages.push({
     sender_token: req.body.sender_token,
     text: req.body.message,
-  });
+  })
 
-  var messageSaved = await newMessage.save();
+  var messageSaved = await newMessage.save()
+  console.log(messageSaved)
 
-  var result = false;
+  var result = false
   if (messageSaved) {
-    result = true;
+    result = true
   }
 
-  res.json({ result, messageSaved });
-});
+  res.json({ result, messageSaved })
+})
 
-module.exports = router;
+module.exports = router
