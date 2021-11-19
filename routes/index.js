@@ -205,8 +205,6 @@ router.get("/results", async function (req, res, next) {
 })
 
 router.get("/countresults", async function (req, res, next) {
-  console.log("countresults sollicite")
-
   var token = req.query.token
   var quest_id = req.query.quest_id
 
@@ -303,7 +301,7 @@ router.get("/countresults", async function (req, res, next) {
       },
     },
   ])
-  res.json({ listOffers: listOffers.length })
+  res.json({ offersCount: listOffers.length })
 })
 
 var cloudinary = require("cloudinary").v2
