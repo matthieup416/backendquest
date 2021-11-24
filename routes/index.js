@@ -37,14 +37,12 @@ router.get("/display-offer", async function (req, res, next) {
     { "offers._id": id },
     { offers: { $elemMatch: { _id: ObjectId(id) } } }
   )
-  // console.log(offer);
-  // on sélectionne uniquement les données de l'annonce
+  // on sélectionne uniquement les données de l'annonce qui nous intéressent (et pas toutes les données du user)
   let offerData = offer.offers[0]
 
   // je vais récupérer le firstname, le is_pro et l'avatar du user qui a publié l'offre
   var sellerId = offer._id
   var seller = await UserModel.findOne({ _id: sellerId })
-  // console.log(seller.is_pro);
   let sellerData = {
     sellerToken: seller.token,
     sellerId: seller._id,
@@ -311,6 +309,7 @@ cloudinary.config({
   api_secret: "N0ORgeJRU0z914NPPEBKnH3aJ-I",
 })
 
+// UPDATE OPERATION
 router.post("/upload", async function (req, res, next) {
   var pictureName = "./tmp/" + uniqid() + ".jpg"
   var resultCopy = await req.files.avatar.mv(pictureName)
@@ -323,8 +322,6 @@ router.post("/upload", async function (req, res, next) {
       { avatar: resultCloudinary.url },
       { new: true }
     )
-
-    // console.log("user", user);
 
     res.json({ url: resultCloudinary.url, result: true })
   } else {

@@ -67,12 +67,6 @@ router.get("/selectedQuest", async function (req, res, next) {
 
 router.get("/conversation", async function (req, res, next) {
   var id = req.query.id
-  console.log("/conversation")
-  console.log("/conversation")
-  console.log("/conversation")
-  console.log("/conversation")
-  console.log("/conversation")
-
   //On récupère tous les messages de la conversation selectionnée
   var messages = await ConversationModel.aggregate([
     // On récupère le document ayant l'id du Get
@@ -80,7 +74,7 @@ router.get("/conversation", async function (req, res, next) {
     //on permet de lire les sous documents, un peu comme un .map sur le tableau conversation.messages
     { $unwind: { path: "$messages" } },
     {
-      //On fait la jointure avec la collection users pour récolter les informations de l'utilisateur ayant envoyé chaque message
+      //On fait le lien avec la collection users pour récolter les informations de l'utilisateur ayant envoyé chaque message
       $lookup: {
         from: "users",
         localField: "messages.sender_token",
@@ -101,13 +95,10 @@ router.get("/conversation", async function (req, res, next) {
     },
   ])
 
-  console.log("/Conversation messages", messages)
-
   var offer = await UserModel.findOne(
     { token: messages[0].seller_token },
     { offers: { $elemMatch: { _id: messages[0].offer_id } } }
   )
-
   //On met tout en forme dans un objet à envoyer au front
   var messages = {
     listMessages: messages,
@@ -137,7 +128,6 @@ router.post("/addMessage", async function (req, res, next) {
   })
 
   var messageSaved = await newMessage.save()
-  console.log(messageSaved)
 
   var result = false
   if (messageSaved) {

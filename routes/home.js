@@ -20,8 +20,8 @@ router.get("/userDetail", async (req, res) => {
 
 router.put("/updateUser", async (req, res) => {
   UserModel.updateOne(
-    { token: req.query.token },
-    { job: req.query.job, description: req.query.description },
+    { token: req.body.token },
+    { job: req.body.job, description: req.body.description },
     (err, docs) => {
       if (!err) {
         console.log(docs)
